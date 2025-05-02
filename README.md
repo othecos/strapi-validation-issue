@@ -1,61 +1,65 @@
-# 🚀 Getting started with Strapi
+# Strapi Draft Validation Issue Reproduction
 
-Strapi comes with a full featured [Command Line Interface](https://docs.strapi.io/dev-docs/cli) (CLI) which lets you scaffold and manage your project in seconds.
+This project demonstrates an issue with Strapi's validation behavior where required fields are only validated when publishing content, not when saving as a draft. This causes problems when fetching draft content through the GraphQL API, as it may contain null values for required fields.
 
-### `develop`
+## The Issue
 
-Start your Strapi application with autoReload enabled. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-develop)
+Strapi's current validation behavior:
+- Only enforces validation rules (like required fields) when content is published
+- Allows saving draft content with missing required fields
+- Causes API errors when fetching draft content with missing required fields through GraphQL
 
-```
-npm run develop
-# or
-yarn develop
-```
+## Steps to Reproduce
 
-### `start`
+1. Clone this repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Start the Strapi server:
+   ```
+   npm run develop
+   ```
+4. Create an admin account at http://localhost:1337/admin
 
-Start your Strapi application with autoReload disabled. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-start)
+5. Create a new Article in the admin panel:
+   - Go to Content Manager → Articles
+   - Click "Create new entry"
+   - **Leave the required fields (title and content) empty**
+   - Click "Save" (NOT "Save and publish")
 
-```
-npm run start
-# or
-yarn start
-```
+6. Run the test script to check if the issue exists:
+   ```
+   ./test-validation.sh
+   ```
 
-### `build`
+## Expected vs. Actual Behavior
 
-Build your admin panel. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-build)
+**Expected Behavior**:
+- Validation should occur both on save and publish
+- The API should prevent saving content that doesn't meet validation requirements
+- GraphQL should return proper validation errors instead of internal errors
 
-```
-npm run build
-# or
-yarn build
-```
+**Actual Behavior**:
+- Validation only occurs on publish
+- API allows saving invalid content as draft
+- GraphQL returns errors when fetching draft content with null required fields
 
-## ⚙️ Deployment
+## Project Structure
 
-Strapi gives you many possible deployment options for your project including [Strapi Cloud](https://cloud.strapi.io). Browse the [deployment section of the documentation](https://docs.strapi.io/dev-docs/deployment) to find the best solution for your use case.
+- `src/api/article`: A content type with required fields:
+  - `title` (required string)
+  - `content` (required rich text)
+  - `author` (optional string)
+- `test-validation.sh`: Script that tests GraphQL to demonstrate the issue
 
-```
-yarn strapi deploy
-```
+## Impact
 
-## 📚 Learn more
+This issue affects:
+- Content editors who expect immediate validation feedback
+- API consumers who need to handle draft content through GraphQL
+- System stability when dealing with draft content
 
-- [Resource center](https://strapi.io/resource-center) - Strapi resource center.
-- [Strapi documentation](https://docs.strapi.io) - Official Strapi documentation.
-- [Strapi tutorials](https://strapi.io/tutorials) - List of tutorials made by the core team and the community.
-- [Strapi blog](https://strapi.io/blog) - Official Strapi blog containing articles made by the Strapi team and the community.
-- [Changelog](https://strapi.io/changelog) - Find out about the Strapi product updates, new features and general improvements.
+## Proposed Solution
 
-Feel free to check out the [Strapi GitHub repository](https://github.com/strapi/strapi). Your feedback and contributions are welcome!
-
-## ✨ Community
-
-- [Discord](https://discord.strapi.io) - Come chat with the Strapi community including the core team.
-- [Forum](https://forum.strapi.io/) - Place to discuss, ask questions and find answers, show your Strapi project and get feedback or just talk with other Community members.
-- [Awesome Strapi](https://github.com/strapi/awesome-strapi) - A curated list of awesome things related to Strapi.
-
----
-
-<sub>🤫 Psst! [Strapi is hiring](https://strapi.io/careers).</sub>
+Implement validation checks both on save and publish operations, ensuring consistent validation behavior across all content states.
