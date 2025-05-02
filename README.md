@@ -16,19 +16,30 @@ Strapi's current validation behavior:
    ```
    npm install
    ```
-3. Start the Strapi server:
+3. Set up your environment variables:
+   ```
+   cp .env.example .env
+   ```
+   Then edit the `.env` file with your preferred configuration.
+4. Start the Strapi server:
    ```
    npm run develop
    ```
-4. Create an admin account at http://localhost:1337/admin
+5. Create an admin account at http://localhost:1337/admin
 
-5. Create a new Article in the admin panel:
+6. Make the Article collection public:
+   - Go to Settings → Roles → Public
+   - Find the "Article" collection
+   - Enable the "find" permission
+   - Save the role configuration
+
+7. Create a new Article in the admin panel:
    - Go to Content Manager → Articles
    - Click "Create new entry"
    - **Leave the required fields (title and content) empty**
    - Click "Save" (NOT "Save and publish")
 
-6. Run the test script to check if the issue exists:
+8. Run the test script to check if the issue exists:
    ```
    ./test-validation.sh
    ```
